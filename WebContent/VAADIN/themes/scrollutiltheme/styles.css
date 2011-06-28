@@ -1,0 +1,19 @@
+@import url(../reindeer/styles.css);
+
+html, body, .v-window {
+	min-height: 100% !important;
+	background: #000000;
+}
+
+.v-ff.v-generated-body,
+.v-sa.v-generated-body,
+.v-ch.v-generated-body,
+.v-mac.v-generated-body,
+.v-op.v-generated-body,
+.v-ie8.v-generated-body,
+.v-ie9.v-generated-body 
+.v-app {
+	height: auto;
+	overflow: auto;
+	overflow-y: scroll;
+}
