@@ -45,6 +45,10 @@ public class ScrollUtil extends AbstractComponent {
     public void changeVariables(Object source, Map<String, Object> variables) {
         super.changeVariables(source, variables);
 
+        if (variables.containsKey("debugMessage")) {
+            System.out.println((String) variables.get("debugMessage"));
+        }
+
         if (variables.containsKey("proximityEvent")) {
             fireEvent(new ProximityEvent(this));
         }

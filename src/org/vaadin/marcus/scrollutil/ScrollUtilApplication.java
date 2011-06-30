@@ -13,13 +13,14 @@ import com.vaadin.ui.Window;
 
 public class ScrollUtilApplication extends Application {
     private static final long serialVersionUID = 1L;
+    private VerticalLayout layout;
 
     @Override
     public void init() {
         Window mainWindow = new Window("Scroller Demo Application");
         setMainWindow(mainWindow);
 
-        VerticalLayout layout = new VerticalLayout();
+        layout = new VerticalLayout();
         layout.setWidth("100%");
         layout.setHeight("5000px");
 
@@ -29,16 +30,24 @@ public class ScrollUtilApplication extends Application {
             private static final long serialVersionUID = 1L;
 
             public void proximityDetected(ProximityEvent event) {
-                getMainWindow().showNotification("Proximity event!!");
+                getMainWindow().showNotification(
+                        "Bottom component visibility event!!");
             }
         });
 
         Button initiateScrollButton = new Button("Scroll down");
         final Button scrollToButton = new Button("Here I am!");
+        scrollToButton.addListener(new ClickListener() {
+            private static final long serialVersionUID = 1L;
+
+            public void buttonClick(ClickEvent event) {
+                addScrollDetectionToTop();
+            }
+        });
 
         layout.addComponent(initiateScrollButton);
-        layout.addComponent(scroller);
         layout.addComponent(scrollToButton);
+        layout.addComponent(scroller);
         layout.setExpandRatio(initiateScrollButton, 1);
         layout.setExpandRatio(scrollToButton, 1);
         layout.setComponentAlignment(initiateScrollButton, Alignment.TOP_CENTER);
@@ -51,11 +60,25 @@ public class ScrollUtilApplication extends Application {
             private static final long serialVersionUID = 1L;
 
             public void buttonClick(ClickEvent event) {
-                scroller.scrollTo(scrollToButton);
+
             }
         });
         setTheme("scrollutiltheme");
 
+    }
+
+    protected void addScrollDetectionToTop() {
+        ScrollUtil topListener = new ScrollUtil();
+        topListener.addListener(new ProximityEventListener() {
+            private static final long serialVersionUID = 1L;
+
+            public void proximityDetected(ProximityEvent event) {
+                getMainWindow().showNotification(
+                        "Top component visibility event!!");
+            }
+        });
+
+        layout.addComponent(topListener, 1);
     }
 
 }
