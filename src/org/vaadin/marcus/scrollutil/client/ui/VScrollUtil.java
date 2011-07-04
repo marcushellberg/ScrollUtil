@@ -12,7 +12,6 @@ import com.google.gwt.user.client.ui.Widget;
 import com.vaadin.terminal.gwt.client.ApplicationConnection;
 import com.vaadin.terminal.gwt.client.Paintable;
 import com.vaadin.terminal.gwt.client.UIDL;
-import com.vaadin.terminal.gwt.client.VConsole;
 
 /**
  * Client side widget which communicates with the server. Messages from the
@@ -28,7 +27,6 @@ public class VScrollUtil extends SimplePanel implements Paintable {
      * triggered.
      */
     protected int alertProximity = 200;
-    protected int previousScrollTop = -1;
 
     /** The client side widget identifier */
     protected String paintableId;
@@ -39,7 +37,7 @@ public class VScrollUtil extends SimplePanel implements Paintable {
     private ScrollHandler scrollHandler = new ScrollHandler() {
 
         public void onWindowScroll(ScrollEvent event) {
-            checkProximity();
+            componentVisible(alertProximity);
         }
     };
 
@@ -77,9 +75,6 @@ public class VScrollUtil extends SimplePanel implements Paintable {
             if (uidl.hasAttribute("proximity")) {
                 alertProximity = uidl.getIntAttribute("proximity");
             }
-            if (!inited) {
-                previousScrollTop = Window.getScrollTop();
-            }
 
             if (uidl.getBooleanAttribute("scrollListener")) {
                 addScrollListener();
@@ -88,43 +83,6 @@ public class VScrollUtil extends SimplePanel implements Paintable {
             }
         }
 
-    }
-
-    protected void checkProximity() {
-        int scrollTop = Window.getScrollTop();
-        boolean goingDown = scrollTop > previousScrollTop;
-        previousScrollTop = scrollTop;
-
-        if (goingDown) {
-            int alertThreshold = getElement().getAbsoluteTop() - alertProximity;
-            if (alertThreshold < 0) {
-                alertThreshold = 0;
-            }
-            int windowBottom = Window.getScrollTop() + Window.getClientHeight();
-
-            debug("Going down. WindowBottom: " + windowBottom
-                    + ", alertThreshold: " + alertThreshold);
-            if (windowBottom > alertThreshold) {
-                debug("Fired event");
-                fireProximityEvent();
-            }
-        } else {
-            int alertThreshold = getElement().getAbsoluteTop()
-                    + getElement().getOffsetHeight() + alertProximity;
-
-            debug("Going up. ScrollTop: " + scrollTop + ", alertThreshold: "
-                    + alertThreshold);
-
-            if (scrollTop < alertThreshold) {
-                debug("Fired event");
-                fireProximityEvent();
-            }
-        }
-
-    }
-
-    private void debug(String message) {
-        // client.updateVariable(paintableId, "debugMessage", message, true);
     }
 
     protected void fireProximityEvent() {
@@ -138,26 +96,29 @@ public class VScrollUtil extends SimplePanel implements Paintable {
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
 
             public void execute() {
-                if (!componentVisible()) {
+                if (!componentVisible(0)) {
                     if (scrollHandlerRegistration == null) {
                         scrollHandlerRegistration = Window
                                 .addWindowScrollHandler(scrollHandler);
-                        VConsole.log("Added scroll handler");
                     }
                 }
             }
         });
     }
 
-    private boolean componentVisible() {
-        int top = getElement().getAbsoluteTop();
-        int scrollTop = Window.getScrollTop();
-        int clientHeight = Window.getClientHeight();
+    /**
+     * Checks to see if component is within the viewport +-threshold px
+     * 
+     * @param threshold
+     * @return
+     */
+    private boolean componentVisible(int threshold) {
+        int elementTop = getElement().getAbsoluteTop();
+        int viewportTop = Window.getScrollTop();
+        int viewportBottom = viewportTop + Window.getClientHeight();
 
-        if (top >= scrollTop && top <= scrollTop + clientHeight) {
-            debug("Component visible, firing event. Top: " + top
-                    + ", scrollTop:" + scrollTop + ", clientHeight: "
-                    + clientHeight);
+        if (elementTop >= (viewportTop - threshold)
+                && elementTop <= (viewportBottom + threshold)) {
             fireProximityEvent();
             return true;
         } else {

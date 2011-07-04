@@ -78,7 +78,7 @@ public class ScrollUtilApplication extends Application {
             }
         });
 
-        layout.addComponent(topListener, 1);
+        layout.addComponent(topListener, 0);
     }
 
 }
